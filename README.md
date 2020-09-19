@@ -28,4 +28,3 @@
 | subnet\_ids | n/a |
 | subnet\_zones | n/a |
 | subnets | n/a |
-
