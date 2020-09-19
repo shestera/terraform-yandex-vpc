@@ -10,3 +10,11 @@ output "subnet_ids" {
 output "subnet_zones" {
   value = [for subnet in yandex_vpc_subnet.this : subnet.zone]
 }
+
+output "subnets" {
+  value = { for v in yandex_vpc_subnet.this : v.zone => map(
+    "id", v.id,
+    "name", v.name,
+    "zone", v.zone
+  ) }
+}
