@@ -14,4 +14,3 @@ resource "yandex_vpc_subnet" "this" {
   network_id     = yandex_vpc_network.this.id
   labels         = var.labels
 }
-
