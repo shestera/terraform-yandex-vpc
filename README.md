@@ -1,5 +1,3 @@
-# Terrafom Yandex VPC module
-
 ## Requirements
 
 | Name | Version |
