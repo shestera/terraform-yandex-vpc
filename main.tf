@@ -1,13 +1,8 @@
-terraform {
-  required_version = "~> 0.12.0"
-  required_providers {
-    yandex = "~> 0.41"
-  }
-}
-
 resource "yandex_vpc_network" "this" {
   name        = var.name
   description = "${var.description} ${var.name} network"
+
+  labels = var.labels
 }
 
 resource "yandex_vpc_subnet" "this" {
@@ -17,4 +12,5 @@ resource "yandex_vpc_subnet" "this" {
   v4_cidr_blocks = each.value.v4_cidr_blocks
   zone           = each.value.zone
   network_id     = yandex_vpc_network.this.id
+  labels         = var.labels
 }
