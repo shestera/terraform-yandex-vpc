@@ -5,6 +5,68 @@ resource "yandex_vpc_network" "this" {
   labels = var.labels
 }
 
+resource "yandex_vpc_subnet" "public" {
+  count          = var.nat_instance == true ? 1 : 0
+  name           = "${var.name}-public"
+  v4_cidr_blocks = ["10.100.0.0/24"]
+  zone           = var.nat_instance_zone
+  network_id     = yandex_vpc_network.this.id
+  labels         = var.labels
+
+  depends_on = [
+    yandex_vpc_network.this
+  ]
+}
+
+data "yandex_compute_image" "nat_instance" {
+  family = "nat-instance-ubuntu"
+}
+
+resource "yandex_compute_instance" "nat_instance" {
+  count = var.nat_instance == true ? 1 : 0
+
+  name        = "${var.name}-nat-instance"
+  platform_id = "standard-v2"
+  zone        = yandex_vpc_subnet.public[0].zone
+
+  labels = var.labels
+
+  resources {
+    cores  = 2
+    memory = 2
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = data.yandex_compute_image.nat_instance.id
+    }
+  }
+
+  network_interface {
+    nat       = true
+    subnet_id = yandex_vpc_subnet.public[0].id
+  }
+
+  depends_on = [
+    yandex_vpc_subnet.public
+  ]
+}
+
+resource "yandex_vpc_route_table" "nat_instance" {
+  count = var.nat_instance == true ? 1 : 0
+
+  network_id = yandex_vpc_network.this.id
+
+  static_route {
+    destination_prefix = "0.0.0.0/0"
+    next_hop_address   = yandex_compute_instance.nat_instance[0].network_interface.0.ip_address
+  }
+
+  depends_on = [
+    yandex_compute_instance.nat_instance
+  ]
+}
+
 resource "yandex_vpc_subnet" "this" {
   for_each       = { for z in var.subnets : z.zone => z }
   name           = "${var.name}-${each.value.zone}"
@@ -13,4 +75,11 @@ resource "yandex_vpc_subnet" "this" {
   zone           = each.value.zone
   network_id     = yandex_vpc_network.this.id
   labels         = var.labels
+
+  route_table_id = var.nat_instance == true ? yandex_vpc_route_table.nat_instance[0].id : null
+
+  depends_on = [
+    yandex_vpc_network.this,
+    yandex_vpc_route_table.nat_instance
+  ]
 }

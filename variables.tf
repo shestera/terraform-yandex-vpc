@@ -35,3 +35,14 @@ variable "labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "nat_instance" {
+  type    = bool
+  default = false
+}
+
+variable "nat_instance_zone" {
+  description = "The availability zone where the nat-instance will be created."
+  type        = string
+  default     = "ru-central1-a"
+}
