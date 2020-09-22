@@ -3,13 +3,13 @@
 | Name | Version |
 |------|---------|
 | terraform | >= 0.13 |
-| yandex | ~> 0.43.0 |
+| yandex | ~> 0.44.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| yandex | ~> 0.43.0 |
+| yandex | ~> 0.44.0 |
 
 ## Inputs
 
@@ -30,3 +30,4 @@
 | subnet\_ids | n/a |
 | subnet\_zones | n/a |
 | subnets | n/a |
+
