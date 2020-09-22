@@ -6,7 +6,7 @@ resource "yandex_vpc_network" "this" {
 }
 
 resource "yandex_vpc_subnet" "public" {
-  count          = var.nat_instance == true ? 1 : 0
+  count          = var.nat_instance ? 1 : 0
   name           = "${var.name}-public"
   v4_cidr_blocks = ["10.100.0.0/24"]
   zone           = var.nat_instance_zone
@@ -23,11 +23,12 @@ data "yandex_compute_image" "nat_instance" {
 }
 
 resource "yandex_compute_instance" "nat_instance" {
-  count = var.nat_instance == true ? 1 : 0
+  count = var.nat_instance ? 1 : 0
 
   name        = "${var.name}-nat-instance"
+  hostname    = "${var.name}-nat-instance"
   platform_id = "standard-v2"
-  zone        = yandex_vpc_subnet.public[0].zone
+  zone        = var.nat_instance_zone
 
   labels = var.labels
 
@@ -53,7 +54,7 @@ resource "yandex_compute_instance" "nat_instance" {
 }
 
 resource "yandex_vpc_route_table" "nat_instance" {
-  count = var.nat_instance == true ? 1 : 0
+  count = var.nat_instance ? 1 : 0
 
   network_id = yandex_vpc_network.this.id
 
@@ -76,7 +77,7 @@ resource "yandex_vpc_subnet" "this" {
   network_id     = yandex_vpc_network.this.id
   labels         = var.labels
 
-  route_table_id = var.nat_instance == true ? yandex_vpc_route_table.nat_instance[0].id : null
+  route_table_id = var.nat_instance ? yandex_vpc_route_table.nat_instance[0].id : null
 
   depends_on = [
     yandex_vpc_network.this,
